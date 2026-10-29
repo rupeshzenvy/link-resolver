@@ -254,7 +254,7 @@ async function resolve(url, opts = {}) {
   return { start: url, final: br.url, chain: [...http.chain, ...br.chain.slice(1)], status: br.status, note: br.note, stage: 'browser' };
 }
 
-module.exports = { resolve, embeddedUrl, htmlRedirect, isShortener };
+module.exports = { resolve, embeddedUrl, htmlRedirect, isShortener, SHORTENER_HOSTS, CONTINUE_RE, URL_PARAM_KEYS };
 
 if (require.main === module) {
   const args = process.argv.slice(2);

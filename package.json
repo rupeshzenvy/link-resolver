@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "description": "Follow ad link-shortener chains to the final destination URL",
   "main": "resolve.js",
-  "bin": { "resolve-link": "resolve.js" },
-  "scripts": { "test": "node test/test.js" },
-  "dependencies": { "playwright": "^1.48.0" }
+  "bin": {
+    "resolve-link": "resolve.js"
+  },
+  "scripts": {
+    "test": "node test/test.js",
+    "build:userscript": "node userscript/build-userscript.js"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
 }
