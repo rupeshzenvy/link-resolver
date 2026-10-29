@@ -23,3 +23,25 @@ Exit code 0 = resolved; 1 = stuck/blocked (the last URL reached is still printed
 and reports `blocked`. Rerun with `--show` to solve it by hand. If a site checks countdown timing on the server, use `--real-timers`.
 
 Test: `npm test` (local fake chain, no internet needed).
+
+## iPhone (Safari userscript)
+
+The CLI needs Node and Chromium, which iOS can't run. On iPhone the same browser-stage logic runs as a Safari
+userscript: `userscript/link-resolver.user.js`. It skips encoded-param hops, speeds up countdowns, blocks popups and
+taps "Get Link / Continue / Skip". A bar at the bottom of the page shows what it's doing. CAPTCHAs you solve yourself,
+and then it carries on.
+
+1. Install **Userscripts** (free, App Store).
+2. Settings → Apps → Safari → Extensions → Userscripts: turn it on and allow it on **All Websites**.
+3. Open the Userscripts app once and pick its scripts folder (e.g. iCloud Drive → Userscripts).
+4. In Safari (signed in to GitHub, since the repo is private) open `userscript/link-resolver.user.js` on GitHub and tap
+   **Raw**. Then tap the extensions icon in the address bar → Userscripts → **Install**. Or save the file into the
+   scripts folder with the Files app.
+5. Open your shortener link in Safari.
+
+It only runs on the hosts in its `@match` list. To add a site, add it to `SHORTENER_HOSTS` in `resolve.js` and run
+`npm run build:userscript`, or add an `// @match *://*.example.com/*` line to the script in the Userscripts app.
+If a site opens the real destination in a popup, the bar shows it as "Blocked popup: …". Tap it to go there.
+
+For plain shorteners only (bit.ly, tinyurl, no ad pages) the built-in Shortcuts app is enough: a shortcut with
+*Receive URLs from Share Sheet* → *Expand URL* → *Show Result*.

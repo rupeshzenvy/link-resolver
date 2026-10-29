@@ -71,6 +71,36 @@ server.listen(0, '0.0.0.0', async () => {
     assert.strictEqual(r.status, 'blocked', JSON.stringify(r));
   });
 
+  // Userscript, as Safari would run it: only on the shortener hosts (@match),
+  // in a real browser that follows the whole chain itself.
+  const { chromium, devices } = require('playwright');
+  const fs = require('fs');
+  const path = require('path');
+  const us = fs.readFileSync(path.join(__dirname, '../userscript/link-resolver.user.js'), 'utf8');
+  const asMatched = `if (['localhost', '127.0.0.2'].includes(location.hostname)) {\n${us}\n}`;
+  const browser = await chromium.launch();
+  const openPage = async () => {
+    const ctx = await browser.newContext({ ...devices['iPhone 15'] });
+    await ctx.addInitScript(asMatched);
+    const popups = [];
+    ctx.on('page', p => popups.push(p.url()));
+    return { page: await ctx.newPage(), popups };
+  };
+
+  await check('userscript: same chain reaches destination with no popups', async () => {
+    const { page, popups } = await openPage();
+    await page.goto(`http://localhost:${PORT}/a`);
+    await page.waitForURL(`http://127.0.0.1:${PORT}/final?ok=1`, { timeout: 30000 });
+    assert.strictEqual(popups.length, 1, `expected only the test's own page, got: ${popups}`);
+  });
+
+  await check('userscript: CAPTCHA page asks the user to solve it', async () => {
+    const { page } = await openPage();
+    await page.goto(`http://localhost:${PORT}/cap`);
+    await page.waitForFunction(() => document.body.innerText.includes('solve the CAPTCHA'), null, { timeout: 5000 });
+  });
+
+  await browser.close();
   server.close();
   process.exit(failed ? 1 : 0);
 });
